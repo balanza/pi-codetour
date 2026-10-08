@@ -25,6 +25,13 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// Downstream pipes can close early (e.g. `| head`), which would otherwise
+// crash the process with an unhandled EPIPE.
+process.stdout.on("error", (err) => {
+  if (err.code === "EPIPE") process.exit(0);
+  throw err;
+});
+
 const RECORD_SEP = "\x1e";
 
 function git(args) {

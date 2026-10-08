@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# The project .npmrc sets loglevel=silent so script output can be piped
+# locally; keep CI logs verbose.
+env:
+  NPM_CONFIG_LOGLEVEL: notice
+
 jobs:
   check:
     runs-on: ubuntu-latest

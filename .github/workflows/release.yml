@@ -16,6 +16,11 @@ permissions:
   contents: write # create the GitHub release
   id-token: write # required for npm provenance
 
+# The project .npmrc sets loglevel=silent so script output can be piped
+# locally; keep CI logs verbose.
+env:
+  NPM_CONFIG_LOGLEVEL: notice
+
 jobs:
   release:
     runs-on: ubuntu-latest

@@ -84,11 +84,20 @@ npm run release          # bump package.json + create the vX.Y.Z commit & tag
 git push --follow-tags   # the Release workflow publishes the matching version
 ```
 
-The `--json` form prints the full decision as one compact line, for scripting:
+The `--json` form prints the full decision as one compact line, so it pipes
+directly into `jq`:
+
+```bash
+$ npm run version:next -- --json | jq -r .nextVersion
+0.2.0
+```
 
 ```json
 {"lastVersion":"0.1.0","nextVersion":"0.2.0","numCommits":13,"bump":"minor","source":"package.json","lastTag":null}
 ```
+
+(The project `.npmrc` sets `loglevel=silent` so npm's `> pkg@version script`
+banner stays off stdout; CI overrides it with `NPM_CONFIG_LOGLEVEL=notice`.)
 
 `bump` is `null` when there are no commits since the last tag (then
 `nextVersion` equals `lastVersion`).
