@@ -1,0 +1,69 @@
+name: Release
+
+# Publishes to npm when a version tag (e.g. v0.1.0) is pushed.
+# Prerequisites:
+#   1. Add an npm automation token as the repo secret `NPM_TOKEN`.
+#   2. Set the `repository.url` in package.json to this repo (required for
+#      npm provenance). Remove `"provenance": true` from publishConfig and the
+#      `id-token: write` permission below if you do not want provenance.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # required for npm provenance
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      # Pi provides these at runtime (peer deps), so install them in a scratch
+      # dir and symlink them in just for the type check. See ci.yml.
+      - name: Provide pi host packages for typecheck
+        run: |
+          HOST="${RUNNER_TEMP}/pi-host"
+          mkdir -p "$HOST"
+          (cd "$HOST" && npm init -y >/dev/null && npm install @earendil-works/pi-coding-agent@^1)
+          mkdir -p node_modules/@earendil-works
+          for p in pi-coding-agent pi-tui pi-ai pi-agent-core; do
+            ln -sfn "$HOST/node_modules/@earendil-works/$p" "node_modules/@earendil-works/$p"
+          done
+          ln -sfn "$HOST/node_modules/typebox" node_modules/typebox
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Verify tag matches package.json version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

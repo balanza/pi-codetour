@@ -57,3 +57,25 @@ CI (`.github/workflows/ci.yml`) runs lint, tests, and typecheck on every push
 and pull request. The pure engine (`src/terminal.ts`, `src/editor.ts`) has no
 pi imports and is unit-tested directly; `index.ts` and `src/tour-ui.ts` are the
 pi adapter layer and are covered by the typecheck step.
+
+## Releasing
+
+Publishing to npm is automated by `.github/workflows/release.yml`, which runs on
+any pushed `v*.*.*` tag. One-time setup:
+
+1. Create an npm **automation** access token and add it as the repo secret
+   `NPM_TOKEN` (Settings → Secrets and variables → Actions).
+2. Point `repository.url` in `package.json` at this GitHub repo — required for
+   the [npm provenance](https://docs.npmjs.com/generating-provenance-statements)
+   attestation. (Drop `publishConfig.provenance` and the `id-token` permission
+   in the workflow if you don't want provenance.)
+
+Then cut a release:
+
+```bash
+npm version patch        # bumps package.json and creates a vX.Y.Z commit + tag
+git push --follow-tags   # the Release workflow publishes the matching version
+```
+
+The workflow re-runs lint/test/typecheck, verifies the tag matches
+`package.json` version, and publishes with `--access public`.
