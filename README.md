@@ -79,9 +79,26 @@ since the last `v*` tag:
 
 ```bash
 npm run version:next     # print the next version without changing anything
+npm run version:next -- --json   # same, as JSON
 npm run release          # bump package.json + create the vX.Y.Z commit & tag
 git push --follow-tags   # the Release workflow publishes the matching version
 ```
+
+The `--json` form prints the full decision, for scripting:
+
+```json
+{
+  "lastVersion": "0.1.0",
+  "nextVersion": "0.2.0",
+  "numCommits": 13,
+  "bump": "minor",
+  "source": "package.json",
+  "lastTag": null
+}
+```
+
+`bump` is `null` when there are no commits since the last tag (then
+`nextVersion` equals `lastVersion`).
 
 The workflow re-runs lint/test/typecheck, verifies the tag matches
 `package.json` version, publishes with `--access public`, and creates a GitHub

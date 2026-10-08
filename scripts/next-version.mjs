@@ -9,10 +9,12 @@
  *   - otherwise                        -> patch bump
  *
  * Prints the bare next version (e.g. `0.2.0`) to stdout. Pass `--apply` to run
- * `npm version <next>` (which creates the version commit and tag).
+ * `npm version <next>` (which creates the version commit and tag), or `--json`
+ * to print `{ lastVersion, nextVersion, numCommits, bump }` instead.
  *
  * Usage:
  *   node scripts/next-version.mjs          # print next version
+ *   node scripts/next-version.mjs --json   # print the result as JSON
  *   node scripts/next-version.mjs --apply  # bump + tag via npm version
  *
  * Note: this bumps breaking changes to a full major even before 1.0.0. Adjust
@@ -91,33 +93,49 @@ function pkgVersion() {
 
 function main() {
   const apply = process.argv.includes("--apply");
+  const asJson = process.argv.includes("--json");
+
   const tag = lastTag();
   // Base the bump on the tag when present, else on package.json.
   const base = tag ? tag : pkgVersion();
+  const parsed = parseVersion(base);
+  const lastVersion = `${parsed.major}.${parsed.minor}.${parsed.patch}`;
   const commits = commitsSince(tag);
 
-  if (commits.length === 0) {
-    console.error(`No commits since ${tag ?? "the start"}; nothing to release.`);
-    process.stdout.write(
-      `${parseVersion(base).major}.${parseVersion(base).minor}.${parseVersion(base).patch}\n`,
+  // With nothing to release, the next version is the current one and there is
+  // no bump to report.
+  const bump = commits.length === 0 ? null : decideBump(commits);
+  const nextVersion = bump === null ? lastVersion : applyBump(parsed, bump);
+
+  const result = {
+    lastVersion,
+    nextVersion,
+    numCommits: commits.length,
+    bump,
+    source: tag ? "tag" : "package.json",
+    lastTag: tag,
+  };
+
+  if (!asJson) {
+    console.error(
+      bump === null
+        ? `No commits since ${tag ?? "the start"}; nothing to release.`
+        : `Last version: ${lastVersion} (${result.source}) · ` +
+            `${commits.length} commit(s) · ${bump} bump -> ${nextVersion}`,
     );
-    process.exit(0);
   }
-
-  const bump = decideBump(commits);
-  const next = applyBump(parseVersion(base), bump);
-
-  console.error(
-    `Last version: ${base} (${tag ? "tag" : "package.json"}) · ` +
-      `${commits.length} commit(s) · ${bump} bump -> ${next}`,
-  );
 
   if (apply) {
+    if (bump === null) process.exit(0);
     // npm version creates the commit + tag using this exact version.
-    execFileSync("npm", ["version", next, "-m", "chore(release): v%s"], { stdio: "inherit" });
-  } else {
-    process.stdout.write(`${next}\n`);
+    execFileSync("npm", ["version", nextVersion, "-m", "chore(release): v%s"], {
+      stdio: "inherit",
+    });
+    if (asJson) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    return;
   }
+
+  process.stdout.write(asJson ? `${JSON.stringify(result, null, 2)}\n` : `${nextVersion}\n`);
 }
 
 main();
