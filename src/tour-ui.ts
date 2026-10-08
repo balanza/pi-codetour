@@ -3,7 +3,7 @@
  * selectable list; moving the cursor drives the editor pane to the matching
  * file/line. Enter focuses the editor pane, esc/q returns to the chat.
  */
-import { type ExtensionContext, DynamicBorder } from "@earendil-works/pi-coding-agent";
+import { DynamicBorder, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
   Container,
   type SelectItem,

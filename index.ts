@@ -87,11 +87,12 @@ export default function codetour(pi: ExtensionAPI) {
     pane?.dispose();
     pane = null;
 
-    const ended =
-      result.lastIndex >= 0 ? tour.stops[result.lastIndex] : undefined;
+    const ended = result.lastIndex >= 0 ? tour.stops[result.lastIndex] : undefined;
     return [
       `The user browsed the "${tour.title}" tour (${tour.stops.length} stops) in the editor pane.`,
-      ended ? `They ended on stop ${result.lastIndex + 1}: ${ended.label} (${ended.file}:${ended.line}).` : "",
+      ended
+        ? `They ended on stop ${result.lastIndex + 1}: ${ended.label} (${ended.file}:${ended.line}).`
+        : "",
       "Continue the conversation; ask if they want more detail on any stop.",
     ]
       .filter(Boolean)

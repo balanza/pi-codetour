@@ -43,3 +43,17 @@ you code it will open the tour. Navigate with `↑`/`↓` (the editor follows),
 closes the editor pane).
 
 Re-open the most recent tour any time with `/codetour`.
+
+## Development
+
+```bash
+npm run lint        # Biome lint + format check
+npm run format      # apply Biome fixes
+npm test            # node:test suite over the pi-free engine
+npm run typecheck   # tsc --noEmit (needs the pi host packages present)
+```
+
+CI (`.github/workflows/ci.yml`) runs lint, tests, and typecheck on every push
+and pull request. The pure engine (`src/terminal.ts`, `src/editor.ts`) has no
+pi imports and is unit-tested directly; `index.ts` and `src/tour-ui.ts` are the
+pi adapter layer and are covered by the typecheck step.

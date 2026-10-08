@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      # Pi provides these packages to extensions at runtime, so they are peer
+      # dependencies and must not be bundled. For type-checking only, install
+      # them in a scratch dir outside the repo (installing them into the project
+      # itself trips an npm peer-resolution bug) and symlink them in, mirroring
+      # how pi supplies them.
+      - name: Provide pi host packages for typecheck
+        run: |
+          HOST="${RUNNER_TEMP}/pi-host"
+          mkdir -p "$HOST"
+          (cd "$HOST" && npm init -y >/dev/null && npm install @earendil-works/pi-coding-agent@^1)
+          mkdir -p node_modules/@earendil-works
+          for p in pi-coding-agent pi-tui pi-ai pi-agent-core; do
+            ln -sfn "$HOST/node_modules/@earendil-works/$p" "node_modules/@earendil-works/$p"
+          done
+          ln -sfn "$HOST/node_modules/typebox" node_modules/typebox
+
+      - name: Typecheck
+        run: npm run typecheck

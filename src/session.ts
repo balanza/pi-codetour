@@ -1,3 +1,4 @@
+import { type EditorDriver, createEditorDriver } from "./editor.js";
 /**
  * Ties the multiplexer and editor together into a single reusable "editor pane"
  * for the lifetime of a pi session. The pane is created lazily on the first
@@ -13,7 +14,6 @@ import {
   paneAlive,
   paneSize,
 } from "./terminal.js";
-import { type EditorDriver, createEditorDriver } from "./editor.js";
 
 export interface EditorPaneOptions {
   /** Codebase root; the editor opens here. */

@@ -9,13 +9,12 @@
   "pi": {
     "extensions": ["./index.ts"]
   },
-  "files": [
-    "index.ts",
-    "src",
-    "README.md"
-  ],
+  "files": ["index.ts", "src", "README.md"],
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "node --import tsx --test test/*.test.ts"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",
@@ -23,7 +22,9 @@
     "typebox": "*"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@types/node": "^26.6.4",
+    "tsx": "^4.23.15",
     "typescript": "^5.6.3"
   }
 }

@@ -71,18 +71,7 @@ export class NvimDriver implements EditorDriver {
   }
 
   goto(file: string, line: number, endLine?: number): void {
-    const abs = path.resolve(file);
-    const safe = abs.replace(/ /g, "\\ ");
-    // `:view` opens read-only; `:edit` otherwise. <C-\><C-n> forces normal mode
-    // first so the Ex command always lands regardless of nvim's current mode.
-    const open = this.readonly ? "view" : "edit";
-    let keys = `<C-\\><C-n>:${open} +${Math.max(1, line)} ${safe}<CR>zz`;
-    if (endLine && endLine > line) {
-      // Visually select the range [line, endLine] then recenter on its start.
-      const span = endLine - line;
-      keys += `V${span}j${line}G<C-\\><C-n>zz`;
-    }
-    this.remoteSend(keys);
+    this.remoteSend(nvimGotoKeys(path.resolve(file), line, endLine, this.readonly));
   }
 
   dispose(): void {
@@ -103,6 +92,31 @@ export class NvimDriver implements EditorDriver {
       stdio: ["ignore", "pipe", "ignore"],
     });
   }
+}
+
+/**
+ * Build the `--remote-send` key sequence that drives nvim to a file/line.
+ * Pure (no I/O) so it can be unit-tested without spawning an editor.
+ *
+ * `<C-\><C-n>` forces normal mode first so the Ex command always lands. `:view`
+ * opens read-only, `:edit` otherwise. With an `endLine`, the range is visually
+ * selected and the view recentred on its start.
+ */
+export function nvimGotoKeys(
+  absPath: string,
+  line: number,
+  endLine: number | undefined,
+  readonly: boolean,
+): string {
+  const safe = absPath.replace(/ /g, "\\ ");
+  const open = readonly ? "view" : "edit";
+  const start = Math.max(1, Math.floor(line));
+  let keys = `<C-\\><C-n>:${open} +${start} ${safe}<CR>zz`;
+  if (endLine && endLine > start) {
+    const span = Math.floor(endLine) - start;
+    keys += `V${span}j${start}G<C-\\><C-n>zz`;
+  }
+  return keys;
 }
 
 /** Resolve an editor driver by name. Defaults to nvim. */
