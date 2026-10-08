@@ -5,6 +5,15 @@
   "type": "module",
   "description": "A pi extension that guides you through a codebase by driving an editor in a terminal split.",
   "main": "index.ts",
+  "keywords": ["pi-package"],
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "files": [
+    "index.ts",
+    "src",
+    "README.md"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
