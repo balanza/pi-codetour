@@ -131,11 +131,11 @@ function main() {
     execFileSync("npm", ["version", nextVersion, "-m", "chore(release): v%s"], {
       stdio: "inherit",
     });
-    if (asJson) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    if (asJson) process.stdout.write(`${JSON.stringify(result)}\n`);
     return;
   }
 
-  process.stdout.write(asJson ? `${JSON.stringify(result, null, 2)}\n` : `${nextVersion}\n`);
+  process.stdout.write(asJson ? `${JSON.stringify(result)}\n` : `${nextVersion}\n`);
 }
 
 main();

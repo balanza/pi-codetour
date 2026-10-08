@@ -84,17 +84,10 @@ npm run release          # bump package.json + create the vX.Y.Z commit & tag
 git push --follow-tags   # the Release workflow publishes the matching version
 ```
 
-The `--json` form prints the full decision, for scripting:
+The `--json` form prints the full decision as one compact line, for scripting:
 
 ```json
-{
-  "lastVersion": "0.1.0",
-  "nextVersion": "0.2.0",
-  "numCommits": 13,
-  "bump": "minor",
-  "source": "package.json",
-  "lastTag": null
-}
+{"lastVersion":"0.1.0","nextVersion":"0.2.0","numCommits":13,"bump":"minor","source":"package.json","lastTag":null}
 ```
 
 `bump` is `null` when there are no commits since the last tag (then
