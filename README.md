@@ -1,4 +1,4 @@
-# pi-codetour
+# @balanza/pi-codetour
 
 A [pi](https://github.com/earendil-works/pi) extension that turns the agent into
 a **guided code tour**: when you ask how something works, pi can open an editor
@@ -29,9 +29,15 @@ you get an interactive list of stops; moving the cursor drives the editor
 - **Lifecycle**: the editor pane is created on the first tour and **closed when
   you quit the tour**; the next tour reopens a fresh one.
 
+## Install
+
+```bash
+pi install npm:@balanza/pi-codetour
+```
+
 ## Usage
 
-Load it directly during development:
+Or load it directly during development:
 
 ```bash
 pi --extension ~/pi-codetour/index.ts

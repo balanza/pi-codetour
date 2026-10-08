@@ -1,5 +1,5 @@
 {
-  "name": "pi-codetour",
+  "name": "@balanza/pi-codetour",
   "version": "0.1.0",
   "type": "module",
   "license": "MIT",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/<you>/pi-codetour.git"
+    "url": "git+https://github.com/balanza/pi-codetour.git"
   },
   "publishConfig": {
     "access": "public",
