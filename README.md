@@ -69,12 +69,27 @@ pi adapter layer and are covered by the typecheck step.
 Publishing to npm is automated by `.github/workflows/release.yml`, which runs on
 any pushed `v*.*.*` tag. One-time setup:
 
-1. Create an npm **automation** access token and add it as the repo secret
-   `NPM_TOKEN` (Settings → Secrets and variables → Actions).
-2. Point `repository.url` in `package.json` at this GitHub repo — required for
-   the [npm provenance](https://docs.npmjs.com/generating-provenance-statements)
-   attestation. (Drop `publishConfig.provenance` and the `id-token` permission
-   in the workflow if you don't want provenance.)
+Authentication uses [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/)
+(OIDC), so **no npm token is stored anywhere**. One-time setup:
+
+1. Publish the first version manually, because a trusted publisher can only be
+   configured on a package that already exists:
+   ```bash
+   npm login && npm publish
+   ```
+2. On npmjs.com: **Packages → @balanza/pi-codetour → Settings → Trusted
+   Publisher → GitHub Actions**, with organization `balanza`, repository
+   `pi-codetour`, workflow filename `release.yml`, and the **npm publish**
+   action allowed. Fields are case-sensitive and are *not* validated on save.
+   The configuration expires if no publish succeeds within 2 days.
+3. Keep `repository.url` in `package.json` matching this repo exactly — npm
+   rejects OIDC publishes otherwise.
+4. Once a CI publish has succeeded, harden it: **Settings → Publishing access →
+   "Require two-factor authentication and disallow tokens"**.
+
+Provenance is generated automatically for OIDC publishes, so no `--provenance`
+flag is needed. The workflow pins Node 24 because trusted publishing requires
+npm ≥ 11.5.1, which Node 22 does not ship.
 
 Then cut a release. The version is derived from the conventional commits made
 since the last `v*` tag:

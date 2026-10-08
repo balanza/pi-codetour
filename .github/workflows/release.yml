@@ -1,11 +1,18 @@
 name: Release
 
 # Publishes to npm when a version tag (e.g. v0.1.0) is pushed.
+#
+# Authentication uses npm Trusted Publishing (OIDC) - no token is involved.
 # Prerequisites:
-#   1. Add an npm automation token as the repo secret `NPM_TOKEN`.
-#   2. Set the `repository.url` in package.json to this repo (required for
-#      npm provenance). Remove `"provenance": true` from publishConfig and the
-#      `id-token: write` permission below if you do not want provenance.
+#   1. On npmjs.com: package Settings -> Trusted Publisher -> GitHub Actions,
+#      with organization `balanza`, repository `pi-codetour`, and workflow
+#      filename `release.yml` (exact, case-sensitive).
+#   2. `repository.url` in package.json must match this repo exactly.
+#   3. Node >= 22.14 with npm >= 11.5.1 (OIDC support); Node 24 satisfies both.
+# Provenance is generated automatically for OIDC publishes of public packages.
+#
+# Note: the `id-token: write` permission below is what lets the runner mint the
+# OIDC token, so it is required, not optional.
 on:
   push:
     tags:
@@ -14,7 +21,7 @@ on:
 
 permissions:
   contents: write # create the GitHub release
-  id-token: write # required for npm provenance
+  id-token: write # required for npm trusted publishing (OIDC)
 
 # The project .npmrc sets loglevel=silent so script output can be piped
 # locally; keep CI logs verbose.
@@ -29,7 +36,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # Trusted publishing needs npm >= 11.5.1; Node 22 still ships npm 10.
+          node-version: 24
           registry-url: https://registry.npmjs.org
           cache: npm
 
@@ -68,10 +76,10 @@ jobs:
             exit 1
           fi
 
+      # No NODE_AUTH_TOKEN: the npm CLI detects the OIDC environment and
+      # exchanges it for a short-lived publish token by itself.
       - name: Publish to npm
         run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub release
         if: startsWith(github.ref, 'refs/tags/')
