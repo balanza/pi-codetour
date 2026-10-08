@@ -23,8 +23,11 @@ you get an interactive list of stops; moving the cursor drives the editor
 - **Split**: the bigger dimension of the pi pane is split, so a wide terminal
   splits side-by-side and a tall terminal splits top/bottom.
 - **Multiplexer**: WezTerm if available, otherwise tmux.
-- **Editor**: Neovim (LazyVim), driven over a `--listen` socket. The editor
+- **Editor**: Neovim (LazyVim), driven over a `--listen` socket and opened
+  **read-only** (`-R` + `:view`) since this is a navigation pane. The editor
   layer is abstracted so more editors can be added later.
+- **Lifecycle**: the editor pane is created on the first tour and **closed when
+  you quit the tour**; the next tour reopens a fresh one.
 
 ## Usage
 
@@ -36,6 +39,7 @@ pi --extension ~/pi-ext-codetour/index.ts
 
 Then just ask the agent to explain part of the codebase. When it wants to show
 you code it will open the tour. Navigate with `↑`/`↓` (the editor follows),
-`enter` to focus the editor pane, `esc`/`q` to return to the chat.
+`enter` to focus the editor pane, `esc`/`q` to return to the chat (which also
+closes the editor pane).
 
 Re-open the most recent tour any time with `/codetour`.

@@ -22,6 +22,8 @@ export interface EditorPaneOptions {
   editor?: string;
   /** Share of space the editor pane takes when first created (0..1). */
   fraction?: number;
+  /** Open files read-only when the editor supports it. Default true. */
+  readonly?: boolean;
 }
 
 export class EditorPane {
@@ -32,11 +34,13 @@ export class EditorPane {
   private readonly dir: string;
   private readonly editorName: string;
   private readonly fraction: number;
+  private readonly readonly: boolean;
 
   constructor(opts: EditorPaneOptions) {
     this.dir = opts.dir;
     this.editorName = opts.editor ?? "nvim";
     this.fraction = opts.fraction ?? 0.5;
+    this.readonly = opts.readonly ?? true;
   }
 
   /** True if the host terminal supports splitting at all. */
@@ -68,7 +72,7 @@ export class EditorPane {
     const size = paneSize(host.mux, host.paneId);
     const sideBySide = size ? isLandscape(size) : true;
 
-    this.driver = createEditorDriver(this.editorName);
+    this.driver = createEditorDriver(this.editorName, { readonly: this.readonly });
     const split = openSplit({
       mux: host.mux,
       fromPaneId: host.paneId,

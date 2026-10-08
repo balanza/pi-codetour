@@ -82,6 +82,11 @@ export default function codetour(pi: ExtensionAPI) {
     }
 
     const result = await runTourUI(ctx, getPane(ctx), tour);
+
+    // Quitting the tour tears the editor pane down too; the next tour reopens it.
+    pane?.dispose();
+    pane = null;
+
     const ended =
       result.lastIndex >= 0 ? tour.stops[result.lastIndex] : undefined;
     return [

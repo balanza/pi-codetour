@@ -33,17 +33,24 @@ function sleep(ms: number): Promise<void> {
  * included) because it talks to the running server rather than sending keys
  * through the multiplexer, so it is independent of the editor's current mode.
  */
+export interface EditorDriverOptions {
+  /** Open files read-only (this is a navigation pane, not an editing one). */
+  readonly?: boolean;
+}
+
 export class NvimDriver implements EditorDriver {
   readonly name = "nvim";
   private readonly sock: string;
+  private readonly readonly: boolean;
 
-  constructor() {
+  constructor(opts: EditorDriverOptions = {}) {
+    this.readonly = opts.readonly ?? true;
     this.sock = path.join(os.tmpdir(), `codetour-nvim-${process.pid}-${Date.now()}.sock`);
   }
 
   launchCommand(_opts: { dir: string }): string {
-    // The server socket is the only state the goto path needs.
-    return `nvim --listen ${this.sock}`;
+    // `-R` starts nvim in read-only mode; the socket is how goto reaches it.
+    return `nvim ${this.readonly ? "-R " : ""}--listen ${this.sock}`;
   }
 
   async waitReady(timeoutMs: number): Promise<boolean> {
@@ -66,8 +73,10 @@ export class NvimDriver implements EditorDriver {
   goto(file: string, line: number, endLine?: number): void {
     const abs = path.resolve(file);
     const safe = abs.replace(/ /g, "\\ ");
-    // <C-\><C-n> forces normal mode first so the Ex command always lands.
-    let keys = `<C-\\><C-n>:edit +${Math.max(1, line)} ${safe}<CR>zz`;
+    // `:view` opens read-only; `:edit` otherwise. <C-\><C-n> forces normal mode
+    // first so the Ex command always lands regardless of nvim's current mode.
+    const open = this.readonly ? "view" : "edit";
+    let keys = `<C-\\><C-n>:${open} +${Math.max(1, line)} ${safe}<CR>zz`;
     if (endLine && endLine > line) {
       // Visually select the range [line, endLine] then recenter on its start.
       const span = endLine - line;
@@ -97,10 +106,10 @@ export class NvimDriver implements EditorDriver {
 }
 
 /** Resolve an editor driver by name. Defaults to nvim. */
-export function createEditorDriver(name = "nvim"): EditorDriver {
+export function createEditorDriver(name = "nvim", opts: EditorDriverOptions = {}): EditorDriver {
   switch (name) {
     case "nvim":
-      return new NvimDriver();
+      return new NvimDriver(opts);
     default:
       throw new Error(`Unsupported editor: ${name}`);
   }
