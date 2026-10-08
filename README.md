@@ -40,7 +40,7 @@ pi install npm:@balanza/pi-codetour
 Or load it directly during development:
 
 ```bash
-pi --extension ~/pi-codetour/index.ts
+pi --extension /path/to/pi-codetour/index.ts
 ```
 
 Then just ask the agent to explain part of the codebase. When it wants to show
