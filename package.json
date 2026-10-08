@@ -1,0 +1,21 @@
+{
+  "name": "pi-ext-codetour",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A pi extension that guides you through a codebase by driving an editor in a terminal split.",
+  "main": "index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
+    "typebox": "*",
+    "typescript": "^5.6.3"
+  }
+}
