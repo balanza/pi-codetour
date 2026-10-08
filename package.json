@@ -11,6 +11,9 @@
   "pi": {
     "extensions": [
       "./index.ts"
+    ],
+    "skills": [
+      "./skills"
     ]
   },
   "repository": {
@@ -24,6 +27,7 @@
   "files": [
     "index.ts",
     "src",
+    "skills",
     "README.md",
     "LICENSE"
   ],
