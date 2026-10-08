@@ -1,4 +1,4 @@
-# pi-ext-codetour
+# pi-codetour
 
 A [pi](https://github.com/earendil-works/pi) extension that turns the agent into
 a **guided code tour**: when you ask how something works, pi can open an editor
@@ -34,7 +34,7 @@ you get an interactive list of stops; moving the cursor drives the editor
 Load it directly during development:
 
 ```bash
-pi --extension ~/pi-ext-codetour/index.ts
+pi --extension ~/pi-codetour/index.ts
 ```
 
 Then just ask the agent to explain part of the codebase. When it wants to show
