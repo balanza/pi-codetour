@@ -84,4 +84,5 @@ git push --follow-tags   # the Release workflow publishes the matching version
 ```
 
 The workflow re-runs lint/test/typecheck, verifies the tag matches
-`package.json` version, and publishes with `--access public`.
+`package.json` version, publishes with `--access public`, and creates a GitHub
+release for the tag with auto-generated notes and the npm tarball attached.
