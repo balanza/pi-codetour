@@ -22,7 +22,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "format": "biome check --write .",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "version:next": "node scripts/next-version.mjs",
+    "release": "node scripts/next-version.mjs --apply"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",

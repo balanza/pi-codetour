@@ -70,10 +70,16 @@ any pushed `v*.*.*` tag. One-time setup:
    attestation. (Drop `publishConfig.provenance` and the `id-token` permission
    in the workflow if you don't want provenance.)
 
-Then cut a release:
+Then cut a release. The version is derived from the conventional commits made
+since the last `v*` tag:
+
+- any **breaking change** (`type!:` or a `BREAKING CHANGE:` footer) → major
+- otherwise any **`feat`** → minor
+- otherwise → patch
 
 ```bash
-npm version patch        # bumps package.json and creates a vX.Y.Z commit + tag
+npm run version:next     # print the next version without changing anything
+npm run release          # bump package.json + create the vX.Y.Z commit & tag
 git push --follow-tags   # the Release workflow publishes the matching version
 ```
 
