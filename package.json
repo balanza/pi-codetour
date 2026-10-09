@@ -1,6 +1,6 @@
 {
   "name": "@balanza/pi-codetour",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "license": "MIT",
   "description": "A pi extension that guides you through a codebase by driving an editor in a terminal split.",
