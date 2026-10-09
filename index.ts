@@ -7,7 +7,7 @@
  * editor to the matching spot. `/codetour` re-opens the most recent tour.
  */
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { Key } from "@earendil-works/pi-tui";
+import { Key, Text } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
 import { EditorPane } from "./src/session.js";
 import { runTourUI } from "./src/tour-ui.js";
@@ -95,10 +95,39 @@ export default function codetour(pi: ExtensionAPI) {
     return pane;
   };
 
-  /** Reflect the currently-viewed stop in the footer, or clear it. */
+  /**
+   * Reflect the active tour in the footer status and in a persistent banner
+   * above the chat input, so it is always obvious a tour is in progress. Pass
+   * nothing to clear both when no tour is active.
+   */
   const updateStatus = (ctx: ExtensionContext): void => {
-    const stop: TourStop | undefined = activeTour?.stops[currentIndex];
+    const tour = activeTour;
+    const stop: TourStop | undefined = tour?.stops[currentIndex];
     ctx.ui.setStatus("codetour", stop ? `\u{1F4CD} ${stop.file}:${stop.line}` : undefined);
+
+    if (!tour || !stop) {
+      ctx.ui.setWidget("codetour", undefined);
+      return;
+    }
+    const title = tour.title;
+    const position = `stop ${currentIndex + 1}/${tour.stops.length}`;
+    const location = `${stop.file}:${stop.line}`;
+    ctx.ui.setWidget(
+      "codetour",
+      (_tui, theme) => {
+        const line = [
+          theme.fg("accent", theme.bold("\u2590 Code tour")),
+          theme.fg("text", `\u201C${title}\u201D`),
+          theme.fg("dim", "\u00b7"),
+          theme.fg("accent", `\u{1F4CD} ${location}`),
+          theme.fg("muted", `(${position})`),
+          theme.fg("dim", "\u00b7"),
+          theme.fg("muted", "Ctrl+Alt+T to browse"),
+        ].join(" ");
+        return new Text(line);
+      },
+      { placement: "aboveEditor" },
+    );
   };
 
   /** Close the editor pane and forget the active tour. */

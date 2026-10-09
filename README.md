@@ -57,8 +57,9 @@ looking at. Press **`Ctrl+Alt+T`** to toggle between the tour list and the
 chat input:
 
 - **Tour → chat**: the list hands focus back to the chat while the editor pane
-  stays open on the current stop. The footer shows a `📍 file:line` marker so you
-  always know what you are viewing.
+  stays open on the current stop. A banner above the chat input (and a
+  `📍 file:line` marker in the footer) stays visible the whole time, so it is
+  always obvious you are inside a tour and what you are viewing.
 - **Chat → tour**: press `Ctrl+Alt+T` again to jump back into the list, resumed
   on the exact stop you left.
 
