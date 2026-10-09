@@ -1,11 +1,14 @@
 /**
  * The interactive tour list shown inside pi. It renders the stops as a
  * selectable list; moving the cursor drives the editor pane to the matching
- * file/line. Enter focuses the editor pane, esc/q returns to the chat.
+ * file/line. Enter focuses the editor pane, esc/q returns to the chat (and
+ * closes the tour), and the toggle key steps back to the chat while keeping the
+ * tour alive so you can ask about the code you are viewing.
  */
 import { DynamicBorder, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
   Container,
+  type KeyId,
   type SelectItem,
   SelectList,
   Text,
@@ -19,8 +22,20 @@ import type { Tour, TourStop } from "./types.js";
 export interface TourUIResult {
   /** Index the user last looked at, or -1 if none. */
   lastIndex: number;
-  /** How the user left the tour. */
-  reason: "closed" | "no-editor";
+  /**
+   * How the user left the tour:
+   * - "closed": they quit (esc/q) — the caller tears the tour down.
+   * - "chat": they toggled back to the chat — the caller keeps the tour alive.
+   */
+  reason: "closed" | "chat" | "no-editor";
+}
+
+/** Options controlling how the tour UI opens and how to leave it. */
+export interface TourUIOptions {
+  /** Stop to land on when the list opens. Defaults to 0. */
+  startIndex?: number;
+  /** Key that toggles back to the chat without closing the tour. */
+  toggleKey?: KeyId;
 }
 
 function stopItem(stop: TourStop, index: number): SelectItem {
@@ -40,9 +55,12 @@ export async function runTourUI(
   ctx: ExtensionContext,
   pane: EditorPane,
   tour: Tour,
+  options: TourUIOptions = {},
 ): Promise<TourUIResult> {
   const items = tour.stops.map(stopItem);
-  let lastIndex = -1;
+  const startIndex = Math.min(Math.max(0, options.startIndex ?? 0), tour.stops.length - 1);
+  const toggleKey = options.toggleKey;
+  let lastIndex = startIndex;
 
   const drive = (index: number) => {
     const stop = tour.stops[index];
@@ -100,16 +118,18 @@ export async function runTourUI(
 
     container.addChild(list);
     container.addChild(detail);
+    const toggleHint = toggleKey ? " · ctrl+alt+t chat" : "";
     container.addChild(
-      new Text(theme.fg("dim", " ↑↓ browse · enter focus editor · esc/q back to chat")),
+      new Text(theme.fg("dim", ` ↑↓ browse · enter focus editor${toggleHint} · esc/q close tour`)),
     );
     container.addChild(new DynamicBorder((s) => theme.fg("accent", s)));
 
-    // Drive the first stop immediately.
-    drive(0);
+    // Resume on the requested stop (first stop by default).
+    list.setSelectedIndex(startIndex);
+    drive(startIndex);
 
     let lastWidth = 80;
-    renderDetail(0, lastWidth);
+    renderDetail(startIndex, lastWidth);
 
     return {
       render(width: number) {
@@ -129,6 +149,10 @@ export async function runTourUI(
         container.invalidate();
       },
       handleInput(data: string) {
+        if (toggleKey && matchesKey(data, toggleKey)) {
+          done({ lastIndex, reason: "chat" });
+          return;
+        }
         if (matchesKey(data, "q")) {
           done({ lastIndex, reason: "closed" });
           return;

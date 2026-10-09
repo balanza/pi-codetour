@@ -45,10 +45,28 @@ pi --extension /path/to/pi-codetour/index.ts
 
 Then just ask the agent to explain part of the codebase. When it wants to show
 you code it will open the tour. Navigate with `↑`/`↓` (the editor follows),
-`enter` to focus the editor pane, `esc`/`q` to return to the chat (which also
-closes the editor pane).
+`enter` to focus the editor pane, `esc`/`q` to close the tour (which also closes
+the editor pane).
 
 Re-open the most recent tour any time with `/codetour`.
+
+## Chat about the code you are viewing
+
+You do not have to close the tour to talk to the agent about what you are
+looking at. Press **`Ctrl+Alt+T`** to toggle between the tour list and the
+chat input:
+
+- **Tour → chat**: the list hands focus back to the chat while the editor pane
+  stays open on the current stop. The footer shows a `📍 file:line` marker so you
+  always know what you are viewing.
+- **Chat → tour**: press `Ctrl+Alt+T` again to jump back into the list, resumed
+  on the exact stop you left.
+
+While a tour is active, every message you send silently carries the stop you are
+viewing (file, line, label, and its explanation) as context, so you can ask
+"why is this here?" or "what calls this?" and the agent answers about *that*
+code — all in the same conversation, no forking. Quit the tour (`esc`/`q`) to
+clear the marker and stop injecting that context.
 
 ## Development
 
